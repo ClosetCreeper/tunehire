@@ -52,6 +52,23 @@ export async function GET(request: Request) {
   }
 }
 
+export async function DELETE(request: Request) {
+  const id = extractIdFromUrl(request)
+  if (!id) {
+    return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+  }
+
+  try {
+    // Delete logic here, for example:
+    await prisma.service.delete({ where: { id } })
+    return NextResponse.json({ message: `Deleted service ${id}` })
+  } catch (error) {
+    console.error('Error deleting service:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+
 export async function PATCH(request: Request) {
   try {
     const session = await getServerSession(authOptions)
