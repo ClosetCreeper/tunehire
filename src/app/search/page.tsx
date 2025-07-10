@@ -1,7 +1,6 @@
 'use client'
 
-export const dynamic = 'force-dynamic' 
-"The above line must stay for this search page to work"
+export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -67,6 +66,7 @@ export default function SearchPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
     fetchProfiles(searchTerm)
   }
 
