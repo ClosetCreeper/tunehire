@@ -530,342 +530,242 @@ export default function ProfilePage() {
                       Payment Setup Required
                     </h3>
                     <p className="text-sm text-yellow-700 mb-4">
-                      To receive payments, you need to complete your Stripe account setup. This includes providing tax information (W-9) and bank account details.
+                      You need to complete your Stripe onboarding before you can get paid.
                     </p>
                     <button
                       onClick={handleStripeOnboarding}
                       disabled={connectingStripe}
-                      className="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
                     >
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      {connectingStripe ? 'Starting Setup...' : 'Complete Setup'}
+                      {connectingStripe ? 'Redirecting...' : 'Complete Stripe Setup'}
                     </button>
-                  </div>
-                </div>
-              </div>
-            ) : stripeStatus && stripeStatus.onboardingComplete ? (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-green-800 mb-2">
-                      Payment Setup Complete
-                    </h3>
-                    <p className="text-sm text-green-700">
-                      Your Stripe account is fully set up and you can receive payments. You'll receive 95% of each payment, with 5% going to platform fees.
-                    </p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <div className="flex items-start space-x-3">
-                  <CreditCard className="h-6 w-6 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">
-                      Set Up Payments
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Connect your Stripe account to start receiving payments from buyers.
-                    </p>
-                    <button
-                      onClick={handleStripeOnboarding}
-                      disabled={connectingStripe}
-                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
-                    >
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      {connectingStripe ? 'Starting Setup...' : 'Set Up Payments'}
-                    </button>
-                  </div>
-                </div>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 flex items-center space-x-3">
+                <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
+                <p className="text-green-700 font-medium">Your Stripe account is connected and ready to receive payments!</p>
               </div>
             )}
           </div>
         )}
 
-        {/* Services Section - Only show for sellers */}
+        {/* Services Section */}
         {session?.user?.canSell && (
           <div className="bg-white rounded-lg shadow-md p-6 mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Services & Offerings</h2>
-              <p className="text-sm text-gray-600">Define what you offer and what's included</p>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Services</h2>
+              <button
+                onClick={() => {
+                  setShowServiceForm(true)
+                  setEditingService(null)
+                  setServiceForm({
+                    title: '',
+                    description: '',
+                    included: [''],
+                    excluded: [''],
+                    basePrice: 10,
+                    creditRequired: '',
+                    creditInstructions: ''
+                  })
+                }}
+                className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Service
+              </button>
             </div>
-            <button
-              onClick={() => {
-                setEditingService(null)
-                setServiceForm({
-                  title: '',
-                  description: '',
-                  included: [''],
-                  excluded: [''],
-                  basePrice: 10,
-                  creditRequired: '',
-                  creditInstructions: ''
-                })
-                setShowServiceForm(true)
-              }}
-              className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Add Service
-            </button>
-          </div>
 
-          {/* Services List */}
-          <div className="space-y-4 mb-6">
-            {services.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Music className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>No services added yet. Create your first service offering!</p>
-              </div>
-            ) : (
-              services.map((service) => (
-                <div key={service.id} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">{service.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{service.description}</p>
-                      <p className="text-lg font-semibold text-green-600 mt-2">${service.basePrice}</p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleServiceEdit(service)}
-                        className="p-2 text-gray-400 hover:text-blue-600"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleServiceDelete(service.id)}
-                        className="p-2 text-gray-400 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+            {services.length === 0 && <p className="text-gray-600">No services yet. Add one above.</p>}
+
+            <div className="space-y-4">
+              {services.map(service => (
+                <div
+                  key={service.id}
+                  className="border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row md:justify-between md:items-center"
+                >
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{service.title}</h3>
+                    <p className="text-gray-700">{service.description}</p>
+                    <p className="text-sm text-gray-500 mt-1">Price: ${service.basePrice.toFixed(2)}</p>
                   </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {service.included.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium text-green-700 mb-2">✓ Included:</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          {service.included.map((item, index) => (
-                            <li key={index} className="flex items-center">
-                              <Check className="h-3 w-3 text-green-500 mr-2" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {service.excluded.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium text-red-700 mb-2">✗ Not Included:</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          {service.excluded.map((item, index) => (
-                            <li key={index} className="flex items-center">
-                              <X className="h-3 w-3 text-red-500 mr-2" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                  <div className="mt-4 md:mt-0 flex space-x-2">
+                    <button
+                      onClick={() => handleServiceEdit(service)}
+                      className="inline-flex items-center px-3 py-1 border border-purple-600 text-purple-600 text-sm rounded-md hover:bg-purple-50"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleServiceDelete(service.id)}
+                      className="inline-flex items-center px-3 py-1 border border-red-600 text-red-600 text-sm rounded-md hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </button>
                   </div>
-
-                  {(service.creditRequired || service.creditInstructions) && (
-                    <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                      <h4 className="text-sm font-medium text-yellow-800 mb-2">📝 Credit Requirements</h4>
-                      {service.creditRequired && (
-                        <p className="text-sm text-yellow-700 mb-1">
-                          <strong>Required Credit:</strong> {service.creditRequired}
-                        </p>
-                      )}
-                      {service.creditInstructions && (
-                        <p className="text-sm text-yellow-700">
-                          <strong>Instructions:</strong> {service.creditInstructions}
-                        </p>
-                      )}
-                    </div>
-                  )}
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
 
-          {/* Service Form Modal */}
-          {showServiceForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {editingService ? 'Edit Service' : 'Add New Service'}
-                  </h3>
-                  <button
-                    onClick={() => {
-                      setShowServiceForm(false)
-                      setEditingService(null)
-                    }}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
+            {/* Service Form Modal */}
+            {showServiceForm && (
+              <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
+                  <h3 className="text-xl font-semibold mb-4">{editingService ? 'Edit Service' : 'Add Service'}</h3>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Service Title
-                    </label>
-                    <input
-                      type="text"
-                      value={serviceForm.title}
-                      onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="e.g., Piano Recording Session"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      value={serviceForm.description}
-                      onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="Describe your service in detail..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Base Price ($)
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={serviceForm.basePrice}
-                      onChange={(e) => setServiceForm({ ...serviceForm, basePrice: parseFloat(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Required Credit/Attribution
-                    </label>
-                    <input
-                      type="text"
-                      value={serviceForm.creditRequired}
-                      onChange={(e) => setServiceForm({ ...serviceForm, creditRequired: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      placeholder="e.g., Music by [Your Name]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Credit Instructions
-                    </label>
-                    <textarea
-                      value={serviceForm.creditInstructions}
-                      onChange={(e) => setServiceForm({ ...serviceForm, creditInstructions: e.target.value })}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                      placeholder="Specify how and where credit should be given (e.g., in video description, album credits, etc.)"
-                    />
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        What's Included
+                      <label htmlFor="serviceTitle" className="block text-sm font-medium text-gray-700 mb-1">
+                        Title
                       </label>
-                      {serviceForm.included.map((item, index) => (
-                        <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        id="serviceTitle"
+                        value={serviceForm.title}
+                        onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="serviceDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        id="serviceDescription"
+                        rows={4}
+                        value={serviceForm.description}
+                        onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Included</label>
+                      {serviceForm.included.map((item, idx) => (
+                        <div key={idx} className="flex items-center mb-2">
                           <input
                             type="text"
                             value={item}
-                            onChange={(e) => updateIncludedItem(index, e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                            placeholder="e.g., Full arrangement, MIDI file"
+                            onChange={(e) => updateIncludedItem(idx, e.target.value)}
+                            className="flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                           />
-                          {serviceForm.included.length > 1 && (
-                            <button
-                              onClick={() => removeIncludedItem(index)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="h-5 w-5" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => removeIncludedItem(idx)}
+                            type="button"
+                            className="ml-2 text-red-600 hover:text-red-800"
+                            aria-label="Remove included item"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
                         </div>
                       ))}
                       <button
                         onClick={addIncludedItem}
-                        className="text-green-600 hover:text-green-700 text-sm"
+                        type="button"
+                        className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100"
                       >
-                        + Add another item
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add Included
                       </button>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        What's NOT Included
-                      </label>
-                      {serviceForm.excluded.map((item, index) => (
-                        <div key={index} className="flex gap-2 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Excluded</label>
+                      {serviceForm.excluded.map((item, idx) => (
+                        <div key={idx} className="flex items-center mb-2">
                           <input
                             type="text"
                             value={item}
-                            onChange={(e) => updateExcludedItem(index, e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                            placeholder="e.g., Live recording, Sheet music"
+                            onChange={(e) => updateExcludedItem(idx, e.target.value)}
+                            className="flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                           />
-                          {serviceForm.excluded.length > 1 && (
-                            <button
-                              onClick={() => removeExcludedItem(index)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="h-5 w-5" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => removeExcludedItem(idx)}
+                            type="button"
+                            className="ml-2 text-red-600 hover:text-red-800"
+                            aria-label="Remove excluded item"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
                         </div>
                       ))}
                       <button
                         onClick={addExcludedItem}
-                        className="text-red-600 hover:text-red-700 text-sm"
+                        type="button"
+                        className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100"
                       >
-                        + Add another exclusion
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add Excluded
+                      </button>
+                    </div>
+
+                    <div>
+                      <label htmlFor="serviceBasePrice" className="block text-sm font-medium text-gray-700 mb-1">
+                        Base Price ($)
+                      </label>
+                      <input
+                        type="number"
+                        id="serviceBasePrice"
+                        min={1}
+                        value={serviceForm.basePrice}
+                        onChange={(e) => setServiceForm({ ...serviceForm, basePrice: Number(e.target.value) })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="creditRequired" className="block text-sm font-medium text-gray-700 mb-1">
+                        Credit Required
+                      </label>
+                      <input
+                        type="text"
+                        id="creditRequired"
+                        value={serviceForm.creditRequired}
+                        onChange={(e) => setServiceForm({ ...serviceForm, creditRequired: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="E.g., 5 credits"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="creditInstructions" className="block text-sm font-medium text-gray-700 mb-1">
+                        Credit Instructions
+                      </label>
+                      <textarea
+                        id="creditInstructions"
+                        rows={3}
+                        value={serviceForm.creditInstructions}
+                        onChange={(e) => setServiceForm({ ...serviceForm, creditInstructions: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="Explain how credits work for this service..."
+                      />
+                    </div>
+
+                    <div className="flex justify-end space-x-3 mt-6">
+                      <button
+                        onClick={() => setShowServiceForm(false)}
+                        type="button"
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleServiceSave}
+                        type="button"
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
+                      >
+                        Save
                       </button>
                     </div>
                   </div>
-
-                  <div className="flex justify-end space-x-3 mt-6">
-                    <button
-                      onClick={() => {
-                        setShowServiceForm(false)
-                        setEditingService(null)
-                      }}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleServiceSave}
-                      disabled={!serviceForm.title || !serviceForm.basePrice}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
-                    >
-                      {editingService ? 'Update Service' : 'Create Service'}
-                    </button>
-                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
         )}
       </div>
     </div>
