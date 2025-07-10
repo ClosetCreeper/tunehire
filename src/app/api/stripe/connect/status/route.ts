@@ -40,7 +40,7 @@ export async function GET() {
       chargesEnabled: account.charges_enabled,
       payoutsEnabled: account.payouts_enabled,
       detailsSubmitted: account.details_submitted,
-      requiresAction: account.requirements?.currently_due?.length > 0,
+      requiresAction: !!(account.requirements?.currently_due && account.requirements.currently_due.length > 0),
       requirements: account.requirements?.currently_due || []
     }
 
