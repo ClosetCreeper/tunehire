@@ -7,6 +7,8 @@ import Navigation from '@/components/Navigation'
 import { Music, Upload, DollarSign, Save, Plus, Edit, Trash2, Check, X, CreditCard, AlertCircle, CheckCircle } from 'lucide-react'
 import { useUploadThing } from '@/lib/uploadthing'
 
+export const dynamic = 'force-dynamic'
+
 interface Profile {
   id: string
   bio: string
