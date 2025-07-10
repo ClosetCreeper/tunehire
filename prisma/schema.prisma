@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String      @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole    @default(BUYER)
+  canBuy        Boolean     @default(true)
+  canSell       Boolean     @default(false)
+  stripeAccountId String?   @unique
+  stripeOnboardingComplete Boolean @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  accounts      Account[]
+  sessions      Session[]
+  profile       Profile?
+  buyerOrders   Order[]   @relation("BuyerOrders")
+  sellerOrders  Order[]   @relation("SellerOrders")
+  messages      Message[]
+  reviews       Review[]
+  payouts       Payout[]  @relation("SellerPayouts")
+  
+  @@map("users")
+}
+
+model Profile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  bio           String?
+  instrument    String?
+  pricePerMinute Float?
+  profileImage  String?
+  audioSamples  String[] @default([])
+  isAvailable   Boolean  @default(true)
+  services      Service[] 
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("profiles")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  profileId   String
+  title       String
+  description String?
+  included    String[] @default([])
+  excluded    String[] @default([])
+  basePrice   Float
+  creditRequired String?
+  creditInstructions String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  @@map("services")
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  buyerId       String
+  sellerId      String
+  title         String
+  tempo         Int
+  notes         String?
+  lengthMinutes Float
+  totalPrice    Float
+  platformFee   Float       @default(0)
+  sellerAmount  Float       @default(0)
+  sheetMusicUrl String?
+  audioFileUrl  String?
+  intendedUse   String?
+  usageType     UsageType?
+  status        OrderStatus @default(PENDING)
+  stripePaymentIntentId String?
+  stripeTransferId String?
+  stripeTransferGroup String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  buyer    User      @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller   User      @relation("SellerOrders", fields: [sellerId], references: [id])
+  messages Message[]
+  review   Review?
+  
+  @@map("orders")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  senderId  String
+  orderId   String
+  createdAt DateTime @default(now())
+  
+  sender User  @relation(fields: [senderId], references: [id])
+  order  Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  orderId   String   @unique
+  reviewerId String
+  createdAt DateTime @default(now())
+  
+  order    Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  reviewer User  @relation(fields: [reviewerId], references: [id])
+  
+  @@map("reviews")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+model Payout {
+  id            String      @id @default(cuid())
+  sellerId      String
+  amount        Float
+  currency      String      @default("usd")
+  status        PayoutStatus @default(PENDING)
+  stripeTransferId String?
+  orderIds      String[]    @default([])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  seller User @relation("SellerPayouts", fields: [sellerId], references: [id])
+  
+  @@map("payouts")
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+}
+
+enum UsageType {
+  PERSONAL
+  COMMERCIAL
+  EDUCATIONAL
+  BROADCAST
+  STREAMING
+  LIVE_PERFORMANCE
+  OTHER
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
