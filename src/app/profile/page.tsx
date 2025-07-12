@@ -9,7 +9,7 @@ import { useUploadThing } from '@/lib/uploadthing'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-export const runtime = 'edge'
+//export const runtime = 'edge'
 
 
 interface Profile {
