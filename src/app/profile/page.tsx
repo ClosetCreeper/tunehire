@@ -8,7 +8,7 @@ import { Music, Upload, DollarSign, Save, Plus, Edit, Trash2, Check, X, CreditCa
 import { useUploadThing } from '@/lib/uploadthing'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
+//export const revalidate = 0
 //export const runtime = 'edge'
 
 
